@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PPT Master Confirmation</title>
+<style>
+:root { color-scheme: light dark; }
+body { margin: 0; padding: 2rem; font: 1rem/1.5 system-ui, sans-serif; }
+main { max-width: 36rem; margin: 8vh auto 0; }
+h1 { font-size: 1.55rem; }
+form { display: grid; gap: .65rem; max-width: 27rem; }
+input, button { font: inherit; padding: .55rem .75rem; border: 1px solid GrayText; border-radius: .4rem; }
+button { justify-self: start; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+<h1>PPT Master</h1>
+<form action="./" method="get">
+<label for="code">Confirmation code / 确认码</label>
+<input id="code" name="code" required pattern="[0-9a-fA-F]{24}" maxlength="24" spellcheck="false" autocomplete="off">
+<button type="submit">Open confirmation / 打开确认页</button>
+</form>
+</main>
+</body>
+</html>
