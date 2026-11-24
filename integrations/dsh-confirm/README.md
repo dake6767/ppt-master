@@ -1,8 +1,8 @@
 # PPT Master confirmation for DSH Web
 
-This optional extension adds a PPT Master sidebar to DeepSeek Harness Web.
-Use it with the matching PPT Master skill on a Unix host. Start the skill's
-usual two-stage confirmation and enter the confirmation code it prints.
+This optional extension opens PPT Master confirmation links from DeepSeek
+Harness Web. Use it with the matching PPT Master skill on a Unix host.
+Start two-stage confirmation and click the link the skill shares in chat.
 The original confirmation page and server continue to own both stages,
 template choices, validation, and project receipts.
 

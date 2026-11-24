@@ -99,3 +99,16 @@ class LocalServerSecurityTests(unittest.TestCase):
             for asset in assets + paths:
                 with self.subTest(prefix=prefix, asset=asset):
                     self.assertTrue(urljoin(base, asset).startswith(base))
+
+    def test_confirmation_handoff_matches_the_active_companion(self) -> None:
+        code = '12' * 12
+        for links, prefix in (
+            (True, 'PPT Master confirmation link: http://127.0.0.1:6060/#ppt-master-confirm='),
+            (False, 'PPT Master sidebar confirmation code: '),
+        ):
+            with self.subTest(links=links), patch.object(
+                confirm_server, '_web_socket_path', return_value=Path('test.sock') if links else None,
+            ) as probe, self.assertLogs('confirm_ui', level='INFO') as captured:
+                confirm_server._report_web_confirmation(6060, code)
+            probe.assert_called_once_with(code, links=True)
+            self.assertEqual(captured.output, ['INFO:confirm_ui:' + prefix + code])

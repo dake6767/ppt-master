@@ -45,7 +45,7 @@ export async function apply(ctx) {
   }
   const entry = await readFile(new URL('./entry.html', import.meta.url))
   const readiness = createServer(connection => connection.end())
-  const readinessPath = join(directory, `web-${process.pid}-${randomBytes(4).toString('hex')}.sock`)
+  const readinessPath = join(directory, `web-l1-${randomBytes(8).toString('hex')}.sock`)
   await new Promise((resolve, reject) => {
     readiness.once('error', reject)
     readiness.listen(readinessPath, resolve)

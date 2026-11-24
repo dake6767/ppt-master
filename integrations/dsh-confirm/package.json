@@ -1,7 +1,7 @@
 {
   "name": "dsh-ppt-master-confirm",
-  "version": "0.1.0",
-  "description": "Open the PPT Master confirmation page in the DeepSeek Harness Web sidebar.",
+  "version": "0.1.1",
+  "description": "Open PPT Master confirmation links from the DeepSeek Harness Web conversation.",
   "license": "MIT",
   "type": "module",
   "main": "index.js",
@@ -18,7 +18,7 @@
     "bundle": { "patch": "./cordis.patch.yml" },
     "client": {
       "platform": "web",
-      "inject": ["@deepseek-ai/dsh-client-ui-slots"]
+      "inject": []
     }
   }
 }

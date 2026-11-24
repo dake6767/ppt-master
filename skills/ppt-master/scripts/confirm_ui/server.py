@@ -928,7 +928,7 @@ def _wait_for_server_ready(
     return 0
 
 
-def _web_socket_path(code: str) -> Optional[Path]:
+def _web_socket_path(code: str, *, links: bool = False) -> Optional[Path]:
     """Address a confirmation socket in the active DSH home, when enabled."""
     if not hasattr(socket, 'AF_UNIX') or not hasattr(os, 'getuid'):
         return None
@@ -940,7 +940,8 @@ def _web_socket_path(code: str) -> Optional[Path]:
         return None
     if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
         return None
-    for endpoint in directory.glob('web-*.sock'):
+    pattern = 'web-l1-*.sock' if links else 'web-*.sock'
+    for endpoint in directory.glob(pattern):
         try:
             with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
                 probe.settimeout(0.1)
@@ -949,6 +950,15 @@ def _web_socket_path(code: str) -> Optional[Path]:
         except OSError:
             continue
     return None
+
+
+def _report_web_confirmation(port: int, code: str) -> None:
+    """Report a clickable handoff when the DSH companion supports it."""
+    if _web_socket_path(code, links=True) is not None:
+        url = _server_url(port, '/')
+        logger.info('PPT Master confirmation link: %s#ppt-master-confirm=%s', url, code)
+    else:
+        logger.info('PPT Master sidebar confirmation code: %s', code)
 
 
 def _start_web_confirmation(app: Flask, code: str) -> Optional[Path]:
@@ -1016,7 +1026,7 @@ def _launch_background_server(
     url = _server_url(port)
     logger.info('started confirm UI in background: %s (pid=%s)', url, server_pid)
     if socket_path is not None and socket_path.is_socket():
-        logger.info('PPT Master sidebar confirmation code: %s', code)
+        _report_web_confirmation(port, code)
     elif open_browser:
         open_preview_browser(url, logger=logger)
     return proc, port, log_path
@@ -3033,7 +3043,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     url = _server_url(port)
     web_code = args.web_code or secrets.token_hex(12)
     if _start_web_confirmation(app, web_code) is not None:
-        logger.info('PPT Master sidebar confirmation code: %s', web_code)
+        _report_web_confirmation(port, web_code)
     elif not args.no_browser:
         _open_browser_async(url)
 
