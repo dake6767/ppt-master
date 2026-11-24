@@ -1,5 +1,7 @@
+import { randomBytes } from 'node:crypto'
 import { lstat, mkdir, readFile, realpath } from 'node:fs/promises'
 import { request } from 'node:http'
+import { createServer } from 'node:net'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
@@ -42,6 +44,14 @@ export async function apply(ctx) {
     throw new Error('The PPT Master confirmation socket directory must be private to the DSH user.')
   }
   const entry = await readFile(new URL('./entry.html', import.meta.url))
+  const readiness = createServer(connection => connection.end())
+  const readinessPath = join(directory, `web-${process.pid}-${randomBytes(4).toString('hex')}.sock`)
+  await new Promise((resolve, reject) => {
+    readiness.once('error', reject)
+    readiness.listen(readinessPath, resolve)
+  })
+  readiness.unref()
+  ctx.effect(() => () => readiness.close())
   ctx.effect(() => ctx.webServer.register({
     kind: 'prefix',
     path: route,

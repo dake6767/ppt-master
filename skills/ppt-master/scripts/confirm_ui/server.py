@@ -940,7 +940,15 @@ def _web_socket_path(code: str) -> Optional[Path]:
         return None
     if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
         return None
-    return directory / f'{code}.sock'
+    for endpoint in directory.glob('web-*.sock'):
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+                probe.settimeout(0.1)
+                probe.connect(str(endpoint))
+            return directory / f'{code}.sock'
+        except OSError:
+            continue
+    return None
 
 
 def _start_web_confirmation(app: Flask, code: str) -> Optional[Path]:
