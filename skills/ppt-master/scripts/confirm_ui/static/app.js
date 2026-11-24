@@ -929,7 +929,7 @@
     }
 
     function visualStylePreviewSrc(id) {
-        return "/static/style_previews/" + encodeURIComponent(id || "") + ".svg";
+        return "./static/style_previews/" + encodeURIComponent(id || "") + ".svg";
     }
 
     function appendVisualStyleImage(parent, id) {
@@ -990,7 +990,7 @@
         var value = String(id || "").trim();
         if (!value || value === "custom") return "";
         if (!/^[A-Za-z0-9_.-]+$/.test(value)) return "";
-        return "/ai-image-comparison/" + kind + "/" + encodeURIComponent(value) + ".webp";
+        return "./ai-image-comparison/" + kind + "/" + encodeURIComponent(value) + ".webp";
     }
 
     function appendImageStrategyPreviews(card, candidate) {
@@ -4297,7 +4297,7 @@
     function submitStage(payload, nextStage) {
         var btn = document.getElementById("btn-confirm");
         btn.disabled = true;
-        fetch("/api/confirm", {
+        fetch("./api/confirm", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -4370,14 +4370,14 @@
     // and result.json, so a recovered server can tell the existing page exactly when
     // the next stage is ready.
     function pollForStage(nextStage) {
-        fetchJson("/api/session", "session")
+        fetchJson("./api/session", "session")
             .then(function (session) {
                 var readyStage = Number(session && session.recommendation_stage_number || 0);
                 if (readyStage < nextStage) {
                     setTimeout(function () { pollForStage(nextStage); }, 1200);
                     return null;
                 }
-                return fetchJson("/api/recommendations", "recommendations").then(function (data) {
+                return fetchJson("./api/recommendations", "recommendations").then(function (data) {
                     var serverStage = stageNumber(data);
                     if (data && typeof serverStage === "number" && serverStage >= nextStage) {
                         enterStage(data, serverStage);
@@ -4425,14 +4425,14 @@
         if (!designSystemValid(payload)) return;
         if (!customSelectionsValid(payload)) return;
         btn.disabled = true;
-        fetch("/api/confirm", {
+        fetch("./api/confirm", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         }).then(function (r) {
             if (!r.ok) throw new Error("confirm failed");
             showConfirmedOverlay();
-            fetch("/api/shutdown", {
+            fetch("./api/shutdown", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ reason: "confirmed" })
@@ -4472,17 +4472,17 @@
     }
 
     function loadCatalogs() {
-        return fetchJson("/api/catalogs", "catalogs")
-            .catch(function () { return fetchJson("/static/catalogs.json", "static catalogs"); });
+        return fetchJson("./api/catalogs", "catalogs")
+            .catch(function () { return fetchJson("./static/catalogs.json", "static catalogs"); });
     }
 
     function loadIconPreviews() {
-        return fetchJson("/api/icon-previews", "icon previews")
+        return fetchJson("./api/icon-previews", "icon previews")
             .catch(function () { return {}; });
     }
 
     function loadAiImageComparison() {
-        return fetchJson("/api/ai-image-comparison", "AI image comparison")
+        return fetchJson("./api/ai-image-comparison", "AI image comparison")
             .catch(function () { return {}; });
     }
 
@@ -4502,7 +4502,7 @@
     function loadStrategistUi(forceStage) {
         return Promise.all([
             loadCatalogs(),
-            fetchJson("/api/recommendations", "recommendations"),
+            fetchJson("./api/recommendations", "recommendations"),
             loadIconPreviews(),
             loadAiImageComparison()
         ]).then(function (res) {
@@ -4613,7 +4613,7 @@
         // Session remains the first network read so completed runs can close
         // cleanly. Active runs always load the current Strategist stage; Stage 1
         // carries its template catalog inside the recommendation payload.
-        fetchJson("/api/session", "session").catch(function () {
+        fetchJson("./api/session", "session").catch(function () {
             return { phase: "strategist" };
         }).then(function (session) {
             if (session && session.status === "done") {

@@ -10,9 +10,11 @@ Dependencies:
     flask
 """
 
+import re
 import sys
 import unittest
 from pathlib import Path
+from urllib.parse import urljoin
 from unittest.mock import patch
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[1]
@@ -83,3 +85,17 @@ class LocalServerSecurityTests(unittest.TestCase):
                         response = client.post('/api/shutdown', json={}, headers=headers)
                     self.assertEqual(response.status_code, 403)
                     start.assert_not_called()
+
+    def test_confirmation_page_paths_stay_below_its_mount(self) -> None:
+        _, _, client = self.servers[1]
+        with client.get('/') as page:
+            assets = re.findall(r'(?:src|href)="([^"]+)"', page.get_data(as_text=True))
+        with client.get('/static/app.js') as script:
+            paths = re.findall(r'"([^"]*(?:api|static|ai-image-comparison)/[^"]*)"', script.get_data(as_text=True))
+        self.assertTrue(assets)
+        self.assertIn('./api/confirm', paths)
+        for prefix in ('/', '/web/confirm/session/'):
+            base = 'https://example.test' + prefix
+            for asset in assets + paths:
+                with self.subTest(prefix=prefix, asset=asset):
+                    self.assertTrue(urljoin(base, asset).startswith(base))
